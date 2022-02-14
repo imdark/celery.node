@@ -31,7 +31,8 @@ export default class Client extends Base {
     
     
     const headers = {}; /*{'hostname': self.hostname}*/;
-    const routingKey = eventType.replace('-', '.');
+//     const routingKey = eventType.replace('-', '.');
+    const routingKey = 'celery';
     const properties = {}; /* { 'correlationId': taskId, 'replyTo': "" }*/
     
     this.isReady().then(() =>
