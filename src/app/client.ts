@@ -25,7 +25,7 @@ export default class Client extends Base {
   public sendEvent(eventType: string, fields: object): void {
     const exchange = "";
     const event = {
-      'type': eventType
+      'type': eventType,
       ...fields
     };
     
@@ -72,6 +72,7 @@ export default class Client extends Base {
                   //'expires': expires,
           };
           return this.sendEvent('task-sent', sentEventFields);
+        });
         });
       }
     );
