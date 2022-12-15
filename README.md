@@ -75,7 +75,14 @@ Celery.node now supports Celery Message Protocol Version 1 and Version 2.
 ```
 client.conf.TASK_PROTOCOL = 1; // 1 or 2. default is 2.
 ```
-
+## Concurency
+By default node celery does not limit the number of tasks to be processed at the same time, to limit it to only one worker at a time you can
+set the environment variable CELERY_CONCURENCY, for example.
+```
+export CELERY_CONCURENCY=1;
+node examples/tutorial/worker.js
+```
+* currently only supports 0/1 and only on redis 
 ## Install
 ```sh
 $ npm install celery-node

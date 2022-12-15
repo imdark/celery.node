@@ -164,10 +164,34 @@ export default class RedisBroker implements CeleryBroker {
 
     return this.receiveOne(queue)
       .then(body => {
-        if (body) {
-          callback(body);
+        .then(body => {
+        if (process.env.CELERY_CONCURENCY && process.env.CELERY_CONCURENCY == '1') {
+          if (body) {
+            return callback(body);
+          } else {
+            Promise.resolve();
+          }
+        } else {
+          if (body) {
+            callback(body);
+          }
+
+          Promise.resolve();
         }
-        Promise.resolve();
+
+      }).then(body => {
+        if (process.env.CELERY_CONCURENCY && process.env.CELERY_CONCURENCY != '0') {
+          if (body) {
+            return callback(body);
+          } else {
+            Promise.resolve();
+          }
+        } else {
+          if (body) {
+            callback(body);
+          }
+          Promise.resolve();
+        }
       })
       .then(() => this.receive(index, resolve, queue, callback))
       .catch(err => console.log(err));
