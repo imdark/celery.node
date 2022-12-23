@@ -21,7 +21,31 @@ export default class Client extends Base {
   get createTaskMessage(): (...args: any[]) => TaskMessage {
     return this.taskProtocols[this.conf.TASK_PROTOCOL];
   }
-
+  
+  public sendEvent(eventType: string, fields: object): void {
+    const exchange = "";
+    const event = {
+      'type': eventType,
+      ...fields
+    };
+    
+    
+    const headers = {}; /*{'hostname': self.hostname}*/;
+//     const routingKey = eventType.replace('-', '.');
+    const routingKey = 'celery';
+    const properties = {}; /* { 'correlationId': taskId, 'replyTo': "" }*/
+    
+    this.isReady().then(() =>
+      this.broker.publish(
+        event,
+        exchange,
+        routingKey,
+        headers,
+        properties
+      )
+    );
+  }
+  
   public sendTaskMessage(taskName: string, message: TaskMessage): void {
     const { headers, properties, body /*, sentEvent */ } = message;
 
@@ -29,14 +53,29 @@ export default class Client extends Base {
     // exchangeType = 'direct';
     // const serializer = 'json';
 
-    this.isReady().then(() =>
-      this.broker.publish(
-        body,
-        exchange,
-        this.conf.CELERY_QUEUE,
-        headers,
-        properties
-      )
+    this.isReady().then(() => {
+        return this.broker.publish(
+            body,
+            exchange,
+            this.conf.CELERY_QUEUE,
+            headers,
+            properties
+          ).then(() => {
+            const sentEventFields = {
+                  'uuid': message.taskId,
+                  //'root_id': root_id,
+                  //'parent_id': parent_id,
+                  'name': message.taskname,
+                  //'args': argsrepr,
+                  //'kwargs': kwargsrepr,
+                  //'retries': retries,
+                  //'eta': eta,
+                  //'expires': expires,
+          };
+          return this.sendEvent('task-sent', sentEventFields);
+        });
+        });
+      }
     );
   }
 
